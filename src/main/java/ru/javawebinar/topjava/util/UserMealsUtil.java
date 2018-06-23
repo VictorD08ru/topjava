@@ -7,10 +7,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.Month;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class UserMealsUtil {
     public static void main(String[] args) {
@@ -28,55 +27,25 @@ public class UserMealsUtil {
     }
 
     /*
-    * Итоговая временная сложность метода O(N*log(N) + N*2) - сортировка + 2 прохода по списку
+    * Итоговая временная сложность метода O(3N).
+    * если заполнять excessMap через циклы, то сделать это можно за 1 проход по списку (O(2N) в итоге),
+    * Collectors.groupingBy + Collectors.summingInt = O(2N)
     * */
     public static List<UserMealWithExceed>  getFilteredWithExceeded(List<UserMeal> mealList, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
-        ArrayList<UserMeal> sortedMealList = new ArrayList<>(mealList);
-        List<UserMealWithExceed> result = new ArrayList<>();
-        sortedMealList.sort((m1, m2) -> m1.getDateTime().compareTo(m2.getDateTime()));
-        LocalDate oneDay = sortedMealList.get(0).getDateTime().toLocalDate();
 
-        for (int i = 0, calSumPerDay = 0; i < sortedMealList.size(); i++) {
+        Map<LocalDate, Integer> caloriesPerDayMap = mealList.stream()
+                .collect(Collectors.groupingBy(u1 -> u1.getDateTime().toLocalDate(),
+                        Collectors.summingInt(UserMeal::getCalories)));
 
-            //вычисление количества калорий за день
-            if (sortedMealList.get(i)
-                    .getDateTime()
-                    .toLocalDate()
-                    .equals(oneDay))
-                calSumPerDay += sortedMealList.get(i).getCalories();
-
-            if ((!sortedMealList.get(i)
-                    .getDateTime()
-                    .toLocalDate()
-                    .equals(oneDay) ||
-                    i == sortedMealList.size() - 1)) {
-                //в зависимости от того, этот элемент последний или нет
-                //меняется значение первой даты в валидации цикла for
-                int buffer = (i == sortedMealList.size() - 1) ? i : i - 1;
-                //проходим по всем трапезам этого дня от последней по времени к первой
-                for (int j = buffer; j >= 0 &&
-                        sortedMealList.get(j)
-                                .getDateTime()
-                                .toLocalDate()
-                                .equals(oneDay); j--) {
-                    if (TimeUtil.isBetween(
-                            sortedMealList.get(j)
-                                    .getDateTime()
-                                    .toLocalTime(),
-                            startTime, endTime))
-                        result.add(new UserMealWithExceed(
-                                sortedMealList.get(j).getDateTime(),
-                                sortedMealList.get(j).getDescription(),
-                                sortedMealList.get(j).getCalories(),
-                                calSumPerDay > caloriesPerDay));
-
-                }
-
-                calSumPerDay = sortedMealList.get(i).getCalories();
-                oneDay = sortedMealList.get(i).getDateTime().toLocalDate();
-            }
-
-        }
+        List<UserMealWithExceed> result = mealList.stream()
+                .filter(u1 -> TimeUtil.isBetween(u1.getDateTime().toLocalTime(), startTime, endTime))
+                .map(u2 -> new UserMealWithExceed(
+                        u2.getDateTime(),
+                        u2.getDescription(),
+                        u2.getCalories(),
+                        caloriesPerDayMap.get(u2.getDateTime().toLocalDate()) > caloriesPerDay
+                ))
+                .collect(Collectors.toList());
 
         return result;
     }
