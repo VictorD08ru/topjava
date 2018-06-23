@@ -28,7 +28,7 @@ public class UserMealsUtil {
 
     /*
     * Итоговая временная сложность метода O(3N).
-    * если заполнять excessMap через циклы, то сделать это можно за 1 проход по списку (O(2N) в итоге),
+    * если заполнять caloriesPerDayMap через циклы, то сделать это можно за 1 проход по списку (O(2N) в итоге),
     * Collectors.groupingBy + Collectors.summingInt = O(2N)
     * */
     public static List<UserMealWithExceed>  getFilteredWithExceeded(List<UserMeal> mealList, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
