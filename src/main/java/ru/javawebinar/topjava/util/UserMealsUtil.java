@@ -27,15 +27,20 @@ public class UserMealsUtil {
     }
 
     /*
-    * Итоговая временная сложность метода O(3N).
-    * если заполнять caloriesPerDayMap через циклы, то сделать это можно за 1 проход по списку (O(2N) в итоге),
-    * Collectors.groupingBy + Collectors.summingInt = O(2N)
+    * Итоговая временная сложность метода O(2N).
     * */
     public static List<UserMealWithExceed>  getFilteredWithExceeded(List<UserMeal> mealList, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
 
-        Map<LocalDate, Integer> caloriesPerDayMap = mealList.stream()
-                .collect(Collectors.groupingBy(u1 -> u1.getDateTime().toLocalDate(),
-                        Collectors.summingInt(UserMeal::getCalories)));
+        Map<LocalDate, Integer> caloriesPerDayMap = new HashMap<>();
+
+        for (UserMeal userMeal : mealList) {
+            LocalDate localDate = userMeal.getDateTime().toLocalDate();
+            Integer calories = userMeal.getCalories();
+            if (caloriesPerDayMap.isEmpty() || !caloriesPerDayMap.containsKey(localDate))
+                caloriesPerDayMap.put(localDate, calories);
+            else caloriesPerDayMap.replace(localDate,
+                    caloriesPerDayMap.get(localDate) + calories);
+        }
 
         List<UserMealWithExceed> result = mealList.stream()
                 .filter(u1 -> TimeUtil.isBetween(u1.getDateTime().toLocalTime(), startTime, endTime))
