@@ -33,7 +33,6 @@ public class UserMealsUtil {
 
         Map<LocalDate, Integer> caloriesPerDayMap = new HashMap<>();
 
-        //stream().map(...) все равно придется заканчивать forEach или collect.
         mealList.forEach(userMeal -> caloriesPerDayMap.merge(
                 userMeal.getDateTime().toLocalDate(),
                 userMeal.getCalories(),
