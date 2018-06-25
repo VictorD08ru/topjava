@@ -26,8 +26,8 @@ public class UserMealsUtil {
     }
 
     public static List<UserMealWithExceed>  getFilteredWithExceeded(List<UserMeal> mealList, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
-        return doHomework0WithLoop(mealList, startTime, endTime, caloriesPerDay);
-//        return doHomework0WithStream(mealList, startTime, endTime, caloriesPerDay);
+//        return doHomework0WithLoop(mealList, startTime, endTime, caloriesPerDay);
+        return doHomework0WithStream(mealList, startTime, endTime, caloriesPerDay);
     }
 
     /*
