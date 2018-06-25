@@ -33,16 +33,14 @@ public class UserMealsUtil {
 
         Map<LocalDate, Integer> caloriesPerDayMap = new HashMap<>();
 
-        for (UserMeal userMeal : mealList) {
-            LocalDate localDate = userMeal.getDateTime().toLocalDate();
-            Integer calories = userMeal.getCalories();
-            if (caloriesPerDayMap.isEmpty() || !caloriesPerDayMap.containsKey(localDate))
-                caloriesPerDayMap.put(localDate, calories);
-            else caloriesPerDayMap.replace(localDate,
-                    caloriesPerDayMap.get(localDate) + calories);
-        }
+        //stream().map(...) все равно придется заканчивать forEach или collect.
+        mealList.forEach(userMeal -> caloriesPerDayMap.merge(
+                userMeal.getDateTime().toLocalDate(),
+                userMeal.getCalories(),
+                Integer::sum
+        ));
 
-        List<UserMealWithExceed> result = mealList.stream()
+        return mealList.stream()
                 .filter(u1 -> TimeUtil.isBetween(u1.getDateTime().toLocalTime(), startTime, endTime))
                 .map(u2 -> new UserMealWithExceed(
                         u2.getDateTime(),
@@ -51,7 +49,5 @@ public class UserMealsUtil {
                         caloriesPerDayMap.get(u2.getDateTime().toLocalDate()) > caloriesPerDay
                 ))
                 .collect(Collectors.toList());
-
-        return result;
     }
 }
