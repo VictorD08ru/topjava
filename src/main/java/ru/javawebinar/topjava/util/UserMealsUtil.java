@@ -34,13 +34,12 @@ public class UserMealsUtil {
      * Итоговая временная сложность метода - O(2N).
      * */
     private static List<UserMealWithExceed> doHomework0WithStream (List<UserMeal> mealList, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
-        Map<LocalDate, Integer> caloriesPerDayMap = new HashMap<>();
-
-        mealList.forEach(userMeal -> caloriesPerDayMap.merge(
-                userMeal.getDateTime().toLocalDate(),
-                userMeal.getCalories(),
-                Integer::sum
-        ));
+        Map<LocalDate, Integer> caloriesPerDayMap = mealList.stream()
+                .collect(Collectors.toMap(
+                        userMeal -> userMeal.getDateTime().toLocalDate(),
+                        UserMeal::getCalories,
+                        Integer::sum
+                ));
 
         return mealList.stream()
                 .filter(u1 -> TimeUtil.isBetween(u1.getDateTime().toLocalTime(), startTime, endTime))
@@ -54,48 +53,26 @@ public class UserMealsUtil {
     }
 
     /*
-    * В худшем случае временная сложность метода - O(2N)
-    *
+    * Итоговая временная сложность метода - O(2N).
     * */
     private static List<UserMealWithExceed> doHomework0WithLoop(List<UserMeal> mealList, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
         List<UserMealWithExceed> result = new ArrayList<>();
-        Map<LocalDate, CalculateCaloriesHelper> caloriesPerDayMap = new HashMap<>();
+        Map<LocalDate, Integer> caloriesPerDayMap = new HashMap<>();
+
+        mealList.forEach(
+                userMeal -> caloriesPerDayMap.merge(userMeal.getDateTime().toLocalDate(),
+                        userMeal.getCalories(),
+                        Integer::sum
+        ));
 
         for (UserMeal userMeal : mealList) {
-            LocalDate localDate = userMeal.getDateTime().toLocalDate();
-            int calories = userMeal.getCalories();
-
-            if (caloriesPerDayMap.isEmpty() || !caloriesPerDayMap.containsKey(localDate)) {
-                caloriesPerDayMap.put(localDate, new CalculateCaloriesHelper());
-            }
-
-            CalculateCaloriesHelper helper = caloriesPerDayMap.get(localDate);
-            helper.increment(calories);
-            boolean exceeded = helper.getSum() > caloriesPerDay;
-
-            if (TimeUtil.isBetween(userMeal.getDateTime().toLocalTime(), startTime, endTime)) {
+            if (TimeUtil.isBetween(userMeal.getDateTime().toLocalTime(), startTime, endTime))
                 result.add(new UserMealWithExceed(
                         userMeal.getDateTime(),
                         userMeal.getDescription(),
                         userMeal.getCalories(),
-                        exceeded));
-                if (!exceeded) {
-                    helper.addIndex(result.size() - 1);
-                }
-            }
-
-            if (exceeded) {
-                while (helper.hasIndexes()) {
-                    int index = helper.poll();
-                    UserMealWithExceed userMealWithExceed = result.get(index);
-                    result.set(index, new UserMealWithExceed(
-                            userMealWithExceed.getDateTime(),
-                            userMealWithExceed.getDescription(),
-                            userMealWithExceed.getCalories(),
-                            true
-                    ));
-                }
-            }
+                        caloriesPerDayMap.get(userMeal.getDateTime().toLocalDate()) > caloriesPerDay
+                ));
         }
 
         return result;
