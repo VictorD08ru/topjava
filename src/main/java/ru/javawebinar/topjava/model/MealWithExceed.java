@@ -1,9 +1,7 @@
 package ru.javawebinar.topjava.model;
 
-import ru.javawebinar.topjava.util.MealsUtil;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 public class MealWithExceed {
     private final int id;
@@ -53,19 +51,5 @@ public class MealWithExceed {
                 ", calories=" + calories +
                 ", exceed=" + exceed +
                 '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        MealWithExceed that = (MealWithExceed) o;
-        return id == that.id;
-    }
-
-    @Override
-    public int hashCode() {
-
-        return id;
     }
 }

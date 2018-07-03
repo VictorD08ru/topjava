@@ -17,12 +17,16 @@
     </tr>
     <tbody>
         <c:forEach items="${meals}" var="meal">
-            <c:if test="${meal.exceed}">
-                <c:set var="textColor" value="red"/>
-            </c:if>
-            <c:if test="${!meal.exceed}">
-                <c:set var="textColor" value="green"/>
-            </c:if>
+            <c:set var="textColor">
+                <c:choose>
+                    <c:when test="${meal.exceed}">
+                        red
+                    </c:when>
+                    <c:otherwise>
+                        green
+                    </c:otherwise>
+                </c:choose>
+            </c:set>
             <tr style="color: ${textColor}">
 
                 <td>
@@ -36,6 +40,6 @@
         </c:forEach>
     </tbody>
 </table>
-<p><a href="meals?action=insert">Add User</a></p>
+<p><a href="meals?action=insert">Add Meal</a></p>
 </body>
 </html>

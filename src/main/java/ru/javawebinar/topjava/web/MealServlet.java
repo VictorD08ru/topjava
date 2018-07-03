@@ -2,8 +2,8 @@ package ru.javawebinar.topjava.web;
 
 import org.slf4j.Logger;
 import ru.javawebinar.topjava.model.Meal;
-import ru.javawebinar.topjava.service.MealService;
-import ru.javawebinar.topjava.service.MealServiceHardCodeImpl;
+import ru.javawebinar.topjava.dao.MealDAO;
+import ru.javawebinar.topjava.dao.MealDAOHardCodeImpl;
 import ru.javawebinar.topjava.util.MealsUtil;
 
 import javax.servlet.ServletException;
@@ -19,41 +19,43 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class MealServlet extends HttpServlet {
     private static final Logger log = getLogger(MealServlet.class);
     private static final String INSERT_OR_EDIT = "/meal.jsp";
-    private static final String LIST_OF_MEALS = "/meals.jsp";
+    private static final String LIST_OF_MEALS = "meals.jsp";
 
-    private MealService mealService;
+    private MealDAO mealDAO;
 
     public MealServlet() {
-        super();
-        mealService = new MealServiceHardCodeImpl();
+    }
+
+    @Override
+    public void init() {
+        mealDAO = new MealDAOHardCodeImpl();
     }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         log.debug("meals:get");
         String action = req.getParameter("action");
-        String forward;
+        if (action == null) action = "k";
 
-        if ("delete".equalsIgnoreCase(action)) {
-            int id = Integer.valueOf(req.getParameter("mealId"));
-            mealService.removeMeal(id);
-            forward = LIST_OF_MEALS;
-            req.setAttribute("meals", MealsUtil.getFilteredWithExceeded(mealService.getMeals(), LocalTime.MIN,
-                    LocalTime.MAX, 2000));
-        } else if ("edit".equalsIgnoreCase(action)) {
-            forward = INSERT_OR_EDIT;
-            int id = Integer.valueOf(req.getParameter("mealId"));
-            Meal meal = mealService.getMealById(id);
-            req.setAttribute("mealForEdit", meal);
-        } else if("insert".equalsIgnoreCase(action)) {
-            forward = INSERT_OR_EDIT;
-        } else {
-            forward = LIST_OF_MEALS;
-            req.setAttribute("meals", MealsUtil.getFilteredWithExceeded(mealService.getMeals(), LocalTime.MIN,
-                    LocalTime.MAX, 2000));
+        switch (action) {
+            case "edit":
+                int id = Integer.valueOf(req.getParameter("mealId"));
+                req.setAttribute("mealForEdit", mealDAO.getById(id));
+            case "insert":
+                req.getRequestDispatcher(INSERT_OR_EDIT).forward(req, resp);
+                break;
+            case "delete":
+                id = Integer.valueOf(req.getParameter("mealId"));
+                mealDAO.remove(id);
+                resp.sendRedirect(req.getContextPath() + req.getServletPath());
+                break;
+            default:
+                req.setAttribute("meals", MealsUtil.getFilteredWithExceeded(mealDAO.getMeals(), LocalTime.MIN,
+                        LocalTime.MAX, 2000));
+                req.getRequestDispatcher(LIST_OF_MEALS).forward(req, resp);
+                break;
         }
 
-        req.getRequestDispatcher(forward).forward(req, resp);
     }
 
     @Override
@@ -66,19 +68,19 @@ public class MealServlet extends HttpServlet {
         String calories = req.getParameter("calories");
 
         if (mealId == null || mealId.isEmpty()) {
-            mealService.addMeal(
+            mealDAO.add(new Meal(
                     LocalDateTime.parse(dateTime),
                     description,
-                    Integer.valueOf(calories));
+                    Integer.valueOf(calories)));
         } else  {
             int id = Integer.valueOf(mealId);
-            mealService.updateMeal(new Meal(
+            mealDAO.update(new Meal(
                     id,
                     LocalDateTime.parse(dateTime),
                     description,
                     Integer.valueOf(calories)));
         }
-        req.setAttribute("meals", MealsUtil.getFilteredWithExceeded(mealService.getMeals(), LocalTime.MIN,
+        req.setAttribute("meals", MealsUtil.getFilteredWithExceeded(mealDAO.getMeals(), LocalTime.MIN,
                 LocalTime.MAX, 2000));
         req.getRequestDispatcher(LIST_OF_MEALS).forward(req, resp);
     }
