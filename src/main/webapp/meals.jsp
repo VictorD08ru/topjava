@@ -6,6 +6,7 @@
     <title>Meals</title>
 </head>
 <body>
+<c:set var="formatter" value="${DateTimeFormatter.ofPattern(\"yyyy-MM-dd HH:mm\")}"/>
 <h3><a href="index.html">Home</a></h3>
 <h2>Meals</h2>
 <table border="1">
@@ -17,29 +18,18 @@
     </tr>
     <tbody>
         <c:forEach items="${meals}" var="meal">
-            <c:set var="textColor">
-                <c:choose>
-                    <c:when test="${meal.exceed}">
-                        red
-                    </c:when>
-                    <c:otherwise>
-                        green
-                    </c:otherwise>
-                </c:choose>
-            </c:set>
-            <tr style="color: ${textColor}">
-
+            <tr style="color: ${meal.exceed ? "red" : "green"}">
                 <td>
-                    <c:out value="${meal.dateTime.format(DateTimeFormatter.ofPattern(\"yyyy-MM-dd HH:mm\"))}"/>
+                    <c:out value="${meal.dateTime.format(formatter)}"/>
                 </td>
                 <td><c:out value="${meal.description}"/></td>
                 <td><c:out value="${meal.calories}"/></td>
-                <td><a href="meals?action=edit&mealId=<c:out value="${meal.id}"/>">Update</a></td>
-                <td><a href="meals?action=delete&mealId=<c:out value="${meal.id}"/>">Delete</a></td>
+                <td><a href="meals?action=edit&mealId=<c:out value="${meal.id}"/>">Изменить</a></td>
+                <td><a href="meals?action=delete&mealId=<c:out value="${meal.id}"/>">Удалить</a></td>
             </tr>
         </c:forEach>
     </tbody>
 </table>
-<p><a href="meals?action=insert">Add Meal</a></p>
+<p><a href="meals?action=insert">Добавить</a></p>
 </body>
 </html>

@@ -35,7 +35,7 @@ public class MealServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         log.debug("meals:get");
         String action = req.getParameter("action");
-        if (action == null) action = "k";
+        if (action == null) action = "";
 
         switch (action) {
             case "edit":
@@ -47,7 +47,8 @@ public class MealServlet extends HttpServlet {
             case "delete":
                 id = Integer.valueOf(req.getParameter("mealId"));
                 mealDAO.remove(id);
-                resp.sendRedirect(req.getContextPath() + req.getServletPath());
+//                resp.sendRedirect(req.getContextPath() + req.getServletPath());
+                resp.sendRedirect("meals");
                 break;
             default:
                 req.setAttribute("meals", MealsUtil.getFilteredWithExceeded(mealDAO.getMeals(), LocalTime.MIN,
