@@ -14,11 +14,36 @@
         .exceeded {
             color: red;
         }
+
+        dl {
+            background: none repeat scroll 0 0 #FAFAFA;
+            margin: 8px 0;
+            padding: 0;
+        }
+
+        dd {
+            display: inline-block;
+            margin-left: 8px;
+            vertical-align: top;
+        }
     </style>
 </head>
 <body>
 <section>
     <h3><a href="index.html">Home</a></h3>
+    <h2>Filter your meal</h2>
+    <form>
+        <dl>
+            <dd>Date from: <input type="date" name="startDate" value="${param.startDate}"></dd>
+            <dd>Date to:<input type="date" name="endDate" value="${param.endDate}"></dd>
+        </dl>
+        <dl>
+            <dd>Time from: <input type="time" name="startTime" value="${param.startTime}"></dd>
+            <dd>Time to: <input type="time" name="endTime" value="${param.endTime}"></dd>
+        </dl>
+        <button type="submit">Filter</button>
+        <button type="button" onclick="window.location.href='meals'">Clear</button>
+    </form>
     <h2>Meals</h2>
     <a href="meals?action=create">Add Meal</a>
     <hr/>
@@ -33,7 +58,7 @@
         </tr>
         </thead>
         <c:forEach items="${meals}" var="meal">
-            <jsp:useBean id="meal" scope="page" type="ru.javawebinar.topjava.model.MealWithExceed"/>
+            <jsp:useBean id="meal" scope="page" type="ru.javawebinar.topjava.to.MealWithExceed"/>
             <tr class="${meal.exceed ? 'exceeded' : 'normal'}">
                 <td>
                         <%--${meal.dateTime.toLocalDate()} ${meal.dateTime.toLocalTime()}--%>
