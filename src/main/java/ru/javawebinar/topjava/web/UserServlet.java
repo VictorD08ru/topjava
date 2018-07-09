@@ -16,7 +16,7 @@ public class UserServlet extends HttpServlet {
     private static final Logger log = getLogger(UserServlet.class);
 
     @Autowired
-    ProfileRestController profileController;
+    private ProfileRestController profileController;
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -27,6 +27,6 @@ public class UserServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         SecurityUtil.setAuthUserId(Integer.valueOf(request.getParameter("userId")));
-        response.sendRedirect("index.html");
+        response.sendRedirect("meals");
     }
 }

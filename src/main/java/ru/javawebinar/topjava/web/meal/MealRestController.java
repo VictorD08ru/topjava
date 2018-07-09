@@ -6,16 +6,13 @@ import org.springframework.stereotype.Controller;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.service.MealService;
 import ru.javawebinar.topjava.to.MealWithExceed;
-import ru.javawebinar.topjava.util.DateTimeUtil;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.slf4j.LoggerFactory.getLogger;
 import static ru.javawebinar.topjava.util.ValidationUtil.assureIdConsistent;
 import static ru.javawebinar.topjava.util.ValidationUtil.checkNew;
+import static ru.javawebinar.topjava.web.SecurityUtil.*;
 
 @Controller
 public class MealRestController {
@@ -26,49 +23,32 @@ public class MealRestController {
 
     public List<MealWithExceed> getAll() {
         log.info("getAll");
-        return service.getAll();
+        return service.getAll(authUserId(), authUserCaloriesPerDay());
     }
 
     public Meal get(int id) {
         log.info("get {}", id);
-        return service.get(id);
+        return service.get(id, authUserId());
     }
 
     public Meal create(Meal meal) {
         log.info("create {}", meal);
         checkNew(meal);
-        return service.create(meal);
+        return service.create(meal, authUserId());
     }
 
     public void delete(int id) {
         log.info("delete {}", id);
-        service.delete(id);
+        service.delete(id, authUserId());
     }
 
     public void update(Meal meal, int id) {
         log.info("update {} with id={}", meal, id);
         assureIdConsistent(meal, id);
-        service.update(meal);
+        service.update(meal, authUserId());
     }
 
-    public List<MealWithExceed> getFiltered(String startDate, String endDate, String startTime, String endTime) {
-        List<MealWithExceed> result = filterByDate(getAll(), startDate, endDate);
-        return filterByTime(result, startTime, endTime);
-    }
-
-    private List<MealWithExceed> filterByDate(List<MealWithExceed> meals, String startDate, String endDate) {
-        return meals.stream()
-                .filter(meal -> DateTimeUtil.isBetween(meal.getDate(),
-                        (startDate == null || startDate.isEmpty()) ? LocalDate.MIN : LocalDate.parse(startDate),
-                        (endDate == null || endDate.isEmpty()) ? LocalDate.MAX : LocalDate.parse(endDate)))
-                .collect(Collectors.toList());
-    }
-
-    private List<MealWithExceed> filterByTime(List<MealWithExceed> meals, String startTime, String endTime) {
-        return meals.stream()
-                .filter(meal -> DateTimeUtil.isBetween(meal.getTime(),
-                        (startTime == null || startTime.isEmpty()) ? LocalTime.MIN : LocalTime.parse(startTime),
-                        (endTime == null || endTime.isEmpty()) ? LocalTime.MAX : LocalTime.parse(endTime)))
-                .collect(Collectors.toList());
+    public List<MealWithExceed> getAllFiltered(String startDate, String endDate, String startTime, String endTime) {
+        return service.getAllFiltered(authUserId(), authUserCaloriesPerDay(),startDate, endDate, startTime, endTime);
     }
 }

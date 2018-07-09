@@ -7,7 +7,6 @@ import ru.javawebinar.topjava.repository.MealRepository;
 import ru.javawebinar.topjava.to.MealWithExceed;
 import ru.javawebinar.topjava.util.MealsUtil;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
-import ru.javawebinar.topjava.web.SecurityUtil;
 
 import java.util.List;
 
@@ -24,27 +23,32 @@ public class MealServiceImpl implements MealService {
     }
 
     @Override
-    public Meal create(Meal meal) {
-        return repository.save(meal);
+    public Meal create(Meal meal, Integer userId) {
+        return repository.save(meal, userId);
     }
 
     @Override
-    public void delete(int id) throws NotFoundException {
-        checkNotFoundWithId(repository.delete(id), id);
+    public void delete(int id, Integer userId) throws NotFoundException {
+        checkNotFoundWithId(repository.delete(id, userId), id);
     }
 
     @Override
-    public Meal get(int id) throws NotFoundException {
-        return checkNotFoundWithId(repository.get(id), id);
+    public Meal get(int id, Integer userId) throws NotFoundException {
+        return checkNotFoundWithId(repository.get(id, userId), id);
     }
 
     @Override
-    public void update(Meal meal) {
-        checkNotFoundWithId(repository.save(meal), meal.getId());
+    public void update(Meal meal, Integer userId) {
+        checkNotFoundWithId(repository.save(meal, userId), meal.getId());
     }
 
     @Override
-    public List<MealWithExceed> getAll() {
-        return MealsUtil.getWithExceeded(repository.getAll(), SecurityUtil.authUserCaloriesPerDay());
+    public List<MealWithExceed> getAll(Integer userId, int caloriesPerDay) {
+        return MealsUtil.getWithExceeded(repository.getAll(userId), caloriesPerDay);
+    }
+
+    @Override
+    public List<MealWithExceed> getAllFiltered(Integer userId, int caloriesPerDay, String startDate, String endDate, String startTime, String endTime) {
+        return repository.getAllFilteredByDateTime(userId, caloriesPerDay, startDate, endDate, startTime, endTime);
     }
 }

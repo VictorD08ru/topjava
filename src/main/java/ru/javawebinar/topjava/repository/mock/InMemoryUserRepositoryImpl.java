@@ -47,11 +47,7 @@ public class InMemoryUserRepositoryImpl implements UserRepository {
         log.info("getAll");
         return repository.values()
                 .stream()
-                .sorted((u1, u2) ->
-                    (u1.getName().compareTo(u2.getName()) != 0) ?
-                            u1.getName().compareTo(u2.getName()) :
-                            u1.getEmail().compareTo(u2.getEmail())
-                )
+                .sorted(Comparator.comparing(User::getName))
                 .collect(Collectors.toList());
     }
 
@@ -60,7 +56,7 @@ public class InMemoryUserRepositoryImpl implements UserRepository {
         log.info("getByEmail {}", email);
         return repository.values()
                 .stream()
-                .filter(user -> email.equalsIgnoreCase(user.getEmail()))
-                .findFirst().get();
+                .filter(user -> user.getEmail().equalsIgnoreCase(email))
+                .findFirst().orElse(null);
     }
 }

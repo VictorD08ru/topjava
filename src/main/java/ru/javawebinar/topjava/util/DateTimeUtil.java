@@ -6,7 +6,7 @@ import java.time.format.DateTimeFormatter;
 public class DateTimeUtil {
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
-    public static <T extends Comparable> boolean isBetween(T object, T start, T end) {
+    public static <T extends Comparable<T>> boolean isBetween(T object, T start, T end) {
         return (object.compareTo(start) >= 0) && (object.compareTo(end) <= 0);
     }
 
