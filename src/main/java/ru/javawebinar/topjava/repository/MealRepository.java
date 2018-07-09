@@ -15,6 +15,4 @@ public interface MealRepository {
     List<Meal> getAll(Integer userId);
 
     List<Meal> getAllFilteredByDate(Integer userId, String startDate, String endDate);
-
-    List<MealWithExceed> getAllFilteredByDateTime(Integer userid, int caloriesPerDay, String startDate, String endDate, String startTime, String endTime);
 }

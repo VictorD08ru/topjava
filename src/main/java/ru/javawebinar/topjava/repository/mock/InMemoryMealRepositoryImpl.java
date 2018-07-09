@@ -73,12 +73,5 @@ public class InMemoryMealRepositoryImpl implements MealRepository {
                 .sorted(Comparator.comparing(Meal::getDateTime).reversed())
                 .collect(Collectors.toList());
     }
-
-    @Override
-    public List<MealWithExceed> getAllFilteredByDateTime(Integer userId, int caloriesPerDay, String startDate, String endDate, String startTime, String endTime) {
-        LocalTime timeFrom = (startTime == null || startTime.isEmpty()) ? LocalTime.MIN : LocalTime.parse(startTime);
-        LocalTime timeTo = (endTime == null || endTime.isEmpty()) ? LocalTime.MAX : LocalTime.parse(endTime);
-        return MealsUtil.getFilteredWithExceeded(getAllFilteredByDate(userId, startDate, endDate), caloriesPerDay, timeFrom, timeTo);
-    }
 }
 

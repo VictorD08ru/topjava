@@ -8,6 +8,7 @@ import ru.javawebinar.topjava.to.MealWithExceed;
 import ru.javawebinar.topjava.util.MealsUtil;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
 
+import java.time.LocalTime;
 import java.util.List;
 
 import static ru.javawebinar.topjava.util.ValidationUtil.*;
@@ -49,6 +50,8 @@ public class MealServiceImpl implements MealService {
 
     @Override
     public List<MealWithExceed> getAllFiltered(Integer userId, int caloriesPerDay, String startDate, String endDate, String startTime, String endTime) {
-        return repository.getAllFilteredByDateTime(userId, caloriesPerDay, startDate, endDate, startTime, endTime);
+        LocalTime timeFrom = (startTime == null || startTime.isEmpty()) ? LocalTime.MIN : LocalTime.parse(startTime);
+        LocalTime timeTo = (endTime == null || endTime.isEmpty()) ? LocalTime.MAX : LocalTime.parse(endTime);
+        return MealsUtil.getFilteredWithExceeded(repository.getAllFilteredByDate(userId, startDate, endDate), caloriesPerDay, timeFrom, timeTo);
     }
 }
