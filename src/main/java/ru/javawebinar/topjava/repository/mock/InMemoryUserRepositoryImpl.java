@@ -30,8 +30,9 @@ public class InMemoryUserRepositoryImpl implements UserRepository {
         if (user.isNew()) {
             user.setId(counter.getAndIncrement());
             repository.put(user.getId(), user);
-        } else
+        } else {
             return repository.computeIfPresent(user.getId(), (id, oldUser) -> user);
+        }
         log.info("save {}", user);
         return user;
     }
@@ -47,7 +48,7 @@ public class InMemoryUserRepositoryImpl implements UserRepository {
         log.info("getAll");
         return repository.values()
                 .stream()
-                .sorted(Comparator.comparing(User::getName))
+                .sorted(Comparator.comparing(User::getName).thenComparing(User::getId))
                 .collect(Collectors.toList());
     }
 

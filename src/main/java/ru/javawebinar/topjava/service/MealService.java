@@ -4,6 +4,8 @@ import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.to.MealWithExceed;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 public interface MealService {
@@ -18,5 +20,7 @@ public interface MealService {
 
     List<MealWithExceed> getAll(Integer userId, int caloriesPerDay);
 
-    List<MealWithExceed> getAllFiltered(Integer userId, int caloriesPerDay, String startDate, String endDate, String startTime, String endTime);
+    List<MealWithExceed> getAllFiltered(Integer userId, int caloriesPerDay,
+                                        LocalDate startDate, LocalDate endDate,
+                                        LocalTime startTime, LocalTime endTime);
 }

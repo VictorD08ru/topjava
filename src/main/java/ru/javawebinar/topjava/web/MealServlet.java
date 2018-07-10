@@ -22,10 +22,6 @@ public class MealServlet extends HttpServlet {
     private ConfigurableApplicationContext springContext;
 
     private MealRestController mealController;
-//    @Autowired
-//    private AdminRestController adminController;
-//    @Autowired
-//    private ProfileRestController profileController;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
@@ -49,13 +45,13 @@ public class MealServlet extends HttpServlet {
                 LocalDateTime.parse(request.getParameter("dateTime")),
                 request.getParameter("description"),
                 Integer.parseInt(request.getParameter("calories")),
-                id.isEmpty() ? null : mealController.get(Integer.valueOf(id)).getUserId());
+                null);
 
         log.info(meal.isNew() ? "Create {}" : "Update {}", meal);
         if (meal.isNew()) {
             mealController.create(meal);
         } else {
-            mealController.update(meal, meal.getId());
+            mealController.update(meal, Integer.valueOf(id));
         }
         response.sendRedirect("meals");
     }

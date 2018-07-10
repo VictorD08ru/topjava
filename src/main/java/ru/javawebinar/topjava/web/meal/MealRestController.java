@@ -7,6 +7,8 @@ import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.service.MealService;
 import ru.javawebinar.topjava.to.MealWithExceed;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 import static org.slf4j.LoggerFactory.getLogger;
@@ -49,6 +51,10 @@ public class MealRestController {
     }
 
     public List<MealWithExceed> getAllFiltered(String startDate, String endDate, String startTime, String endTime) {
-        return service.getAllFiltered(authUserId(), authUserCaloriesPerDay(),startDate, endDate, startTime, endTime);
+        LocalDate dateFrom = (startDate == null || startDate.isEmpty()) ? LocalDate.MIN : LocalDate.parse(startDate);
+        LocalDate dateTo = (endDate == null || endDate.isEmpty()) ? LocalDate.MAX : LocalDate.parse(endDate);
+        LocalTime timeFrom = (startTime == null || startTime.isEmpty()) ? LocalTime.MIN : LocalTime.parse(startTime);
+        LocalTime timeTo = (endTime == null || endTime.isEmpty()) ? LocalTime.MAX : LocalTime.parse(endTime);
+        return service.getAllFiltered(authUserId(), authUserCaloriesPerDay(), dateFrom, dateTo, timeFrom, timeTo);
     }
 }
