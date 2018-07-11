@@ -12,7 +12,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -29,13 +28,13 @@ public class InMemoryMealRepositoryImpl implements MealRepository {
     @Override
     public Meal save(Meal meal, Integer userId) {
         meal.setUserId(userId);
+        log.info("save {}", meal);
         if (meal.isNew()) {
             meal.setId(counter.incrementAndGet());
             repository.put(meal.getId(), meal);
         } else {
             repository.computeIfPresent(meal.getId(), (id, oldMeal) -> meal);
         }
-        log.info("save {}", meal);
         return meal;
     }
 
@@ -55,23 +54,18 @@ public class InMemoryMealRepositoryImpl implements MealRepository {
 
     @Override
     public List<Meal> getAll(Integer userId) {
-        log.info("getAll");
-        return getAllToStream(userId).collect(Collectors.toList());
+        return getAllFilteredByDate(userId, LocalDate.MIN, LocalDate.MAX);
     }
 
     @Override
     public List<Meal> getAllFilteredByDate(Integer userId, LocalDate start, LocalDate end) {
         log.info("getAll with filters");
-        return getAllToStream(userId)
-                .filter(meal -> DateTimeUtil.isBetween(meal.getDate(), start, end))
-                .collect(Collectors.toList());
-    }
-
-    private Stream<Meal> getAllToStream(Integer userId) {
         return repository.values()
                 .stream()
                 .filter(meal -> Objects.equals(meal.getUserId(), userId))
-                .sorted(Comparator.comparing(Meal::getDateTime).reversed());
+                .filter(meal -> DateTimeUtil.isBetween(meal.getDate(), start, end))
+                .sorted(Comparator.comparing(Meal::getDateTime).reversed())
+                .collect(Collectors.toList());
     }
 }
 
