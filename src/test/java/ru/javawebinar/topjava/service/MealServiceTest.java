@@ -1,6 +1,11 @@
 package ru.javawebinar.topjava.service;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.rules.ExternalResource;
+import org.junit.rules.RuleChain;
+import org.junit.rules.TestName;
 import org.junit.runner.RunWith;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,12 +13,14 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlConfig;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import ru.javawebinar.topjava.LoggerTest;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
 
 import java.time.LocalDate;
 import java.time.Month;
 
+import static org.hamcrest.core.StringStartsWith.startsWith;
 import static ru.javawebinar.topjava.MealTestData.*;
 import static ru.javawebinar.topjava.UserTestData.ADMIN_ID;
 import static ru.javawebinar.topjava.UserTestData.USER_ID;
@@ -30,6 +37,31 @@ public class MealServiceTest {
         SLF4JBridgeHandler.install();
     }
 
+    private ExpectedException thrown = ExpectedException.none();
+    private LoggerTest loggerTest = new LoggerTest();
+    private TestName testName = new TestName();
+    private ExternalResource externalResource = new ExternalResource() {
+        private long testDuration = 0;
+
+        @Override
+        protected void before() throws Throwable {
+            testDuration = System.currentTimeMillis();
+        }
+
+        @Override
+        protected void after() {
+            testDuration = System.currentTimeMillis() - testDuration;
+            loggerTest.getLogger().debug("Test \"{}\" duration: {} ms", testName.getMethodName(), testDuration);
+        }
+    };
+
+
+    @Rule
+    public RuleChain chain = RuleChain.outerRule(testName)
+            .around(loggerTest)
+            .around(externalResource)
+            .around(thrown);
+
     @Autowired
     private MealService service;
 
@@ -39,8 +71,10 @@ public class MealServiceTest {
         assertMatch(service.getAll(USER_ID), MEAL6, MEAL5, MEAL4, MEAL3, MEAL2);
     }
 
-    @Test(expected = NotFoundException.class)
+    @Test
     public void deleteNotFound() throws Exception {
+        thrown.expect(NotFoundException.class);
+        thrown.expectMessage(startsWith("Not found entity with"));
         service.delete(MEAL1_ID, 1);
     }
 
@@ -57,8 +91,10 @@ public class MealServiceTest {
         assertMatch(actual, ADMIN_MEAL1);
     }
 
-    @Test(expected = NotFoundException.class)
+    @Test
     public void getNotFound() throws Exception {
+        thrown.expect(NotFoundException.class);
+        thrown.expectMessage(startsWith("Not found entity with"));
         service.get(MEAL1_ID, ADMIN_ID);
     }
 
@@ -69,8 +105,10 @@ public class MealServiceTest {
         assertMatch(service.get(MEAL1_ID, USER_ID), updated);
     }
 
-    @Test(expected = NotFoundException.class)
+    @Test
     public void updateNotFound() throws Exception {
+        thrown.expect(NotFoundException.class);
+        thrown.expectMessage(startsWith("Not found entity with"));
         service.update(MEAL1, ADMIN_ID);
     }
 
