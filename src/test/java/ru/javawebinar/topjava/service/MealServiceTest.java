@@ -1,19 +1,18 @@
 package ru.javawebinar.topjava.service;
 
+import org.junit.AfterClass;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.rules.ExternalResource;
-import org.junit.rules.RuleChain;
-import org.junit.rules.TestName;
+import org.junit.rules.*;
+import org.junit.runner.Description;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlConfig;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import ru.javawebinar.topjava.LoggerTest;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
 
@@ -21,6 +20,7 @@ import java.time.LocalDate;
 import java.time.Month;
 
 import static org.hamcrest.core.StringStartsWith.startsWith;
+import static org.slf4j.LoggerFactory.getLogger;
 import static ru.javawebinar.topjava.MealTestData.*;
 import static ru.javawebinar.topjava.UserTestData.ADMIN_ID;
 import static ru.javawebinar.topjava.UserTestData.USER_ID;
@@ -37,30 +37,32 @@ public class MealServiceTest {
         SLF4JBridgeHandler.install();
     }
 
+    private static final StringBuilder stringBuilder = new StringBuilder();
+    private static final Logger log = getLogger(MealServiceTest.class);
     private ExpectedException thrown = ExpectedException.none();
-    private LoggerTest loggerTest = new LoggerTest();
-    private TestName testName = new TestName();
-    private ExternalResource externalResource = new ExternalResource() {
-        private long testDuration = 0;
+    private Stopwatch stopwatch = new Stopwatch() {
 
         @Override
-        protected void before() throws Throwable {
-            testDuration = System.currentTimeMillis();
+        protected void finished(long nanos, Description description) {
+            long millis = Math.round(nanos / 1000_000.0);
+            stringBuilder.append("Test \"")
+                    .append(description.getMethodName())
+                    .append("\" duration: \t")
+                    .append(millis)
+                    .append(" ms. \n");
+            log.debug("Test \"{}\" duration: {} ms", description.getMethodName(), millis);
         }
 
-        @Override
-        protected void after() {
-            testDuration = System.currentTimeMillis() - testDuration;
-            loggerTest.getLogger().debug("Test \"{}\" duration: {} ms", testName.getMethodName(), testDuration);
-        }
+
     };
 
-
     @Rule
-    public RuleChain chain = RuleChain.outerRule(testName)
-            .around(loggerTest)
-            .around(externalResource)
-            .around(thrown);
+    public RuleChain chain = RuleChain.outerRule(stopwatch).around(thrown);
+
+    @AfterClass
+    public static void afterClass() {
+        log.debug(stringBuilder.toString());
+    }
 
     @Autowired
     private MealService service;
