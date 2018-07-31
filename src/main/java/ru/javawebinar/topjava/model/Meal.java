@@ -40,7 +40,7 @@ public class Meal extends AbstractBaseEntity {
     private int calories;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false, referencedColumnName = "id")
     @NotNull
     private User user;
 
@@ -96,6 +96,9 @@ public class Meal extends AbstractBaseEntity {
 
     public void setUser(User user) {
         this.user = user;
+//        if (!user.getMeals().contains(this)) {
+//            user.getMeals().add(this);
+//        }
     }
 
     @Override
