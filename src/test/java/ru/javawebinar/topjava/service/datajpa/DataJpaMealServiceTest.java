@@ -1,26 +1,28 @@
 package ru.javawebinar.topjava.service.datajpa;
 
-import org.assertj.core.api.Assertions;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
-import ru.javawebinar.topjava.MealTestData;
 import ru.javawebinar.topjava.Profiles;
 import ru.javawebinar.topjava.UserTestData;
-import ru.javawebinar.topjava.repository.datajpa.CrudMealRepository;
+import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.service.MealServiceTest;
+import ru.javawebinar.topjava.util.exception.NotFoundException;
+
+import static ru.javawebinar.topjava.MealTestData.*;
 
 @ActiveProfiles(Profiles.DATAJPA)
 public class DataJpaMealServiceTest extends MealServiceTest {
 
-    @Autowired
-    private CrudMealRepository crudMealRepository;
+    @Test
+    public void getWithUser() {
+        Meal meal = service.getWithUser(ADMIN_MEAL_ID, UserTestData.ADMIN_ID);
+        assertMatch(meal, ADMIN_MEAL1);
+        UserTestData.assertMatch(meal.getUser(), UserTestData.ADMIN);
+    }
 
     @Test
-    @Transactional
-    public void getUserByMealId() {
-        int userId = crudMealRepository.getOne(MealTestData.MEAL1_ID).getUser().getId();
-        Assertions.assertThat(userId).isEqualTo(UserTestData.USER_ID);
+    public void getWithUserNotFound() {
+        thrown.expect(NotFoundException.class);
+        service.getWithUser(ADMIN_MEAL_ID, UserTestData.USER_ID);
     }
 }
