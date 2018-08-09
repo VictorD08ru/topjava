@@ -1,12 +1,12 @@
-package ru.javawebinar.topjava.web;
+package ru.javawebinar.topjava.web.meal;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.service.MealService;
-import ru.javawebinar.topjava.web.meal.MealRestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
@@ -20,8 +20,9 @@ import static ru.javawebinar.topjava.util.DateTimeUtil.parseLocalTime;
 
 @RequestMapping("/meals")
 @Controller
-public class JspMealController extends MealRestController {
+public class JspMealController extends AbstractMealController {
 
+    @Autowired
     public JspMealController(MealService service) {
         super(service);
     }
@@ -48,37 +49,28 @@ public class JspMealController extends MealRestController {
         return "redirect:/meals";
     }
 
-    @GetMapping("/create")
-    public String loadCreate(HttpServletRequest request) {
-        Meal meal = new Meal(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES), "", 1000);
+    @GetMapping("/save")
+    public String load(HttpServletRequest request) {
+        String id = request.getParameter("id");
+        Meal meal = (id == null || id.isEmpty()) ?
+                new Meal(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES), "", 1000) :
+                get(getId(request));
         request.setAttribute("meal", meal);
         return "mealForm";
     }
 
-    @GetMapping("/update")
-    public String loadUpdate(HttpServletRequest request) {
+    @PostMapping("/save")
+    public String save(HttpServletRequest request) {
         String id = request.getParameter("id");
-        request.setAttribute("meal", get(getId(request)));
-        return "mealForm";
-    }
-
-    @PostMapping("/create")
-    public String create(HttpServletRequest request) {
         Meal meal = new Meal(
                 LocalDateTime.parse(request.getParameter("dateTime")),
                 request.getParameter("description"),
                 Integer.parseInt(request.getParameter("calories")));
-        create(meal);
-        return "redirect:/meals";
-    }
-
-    @PostMapping("/update")
-    public String update(HttpServletRequest request) {
-        Meal meal = new Meal(
-                LocalDateTime.parse(request.getParameter("dateTime")),
-                request.getParameter("description"),
-                Integer.parseInt(request.getParameter("calories")));
-        update(meal, getId(request));
+        if ((id == null || id.isEmpty())) {
+            create(meal);
+        } else {
+            update(meal, getId(request));
+        }
         return "redirect:/meals";
     }
 

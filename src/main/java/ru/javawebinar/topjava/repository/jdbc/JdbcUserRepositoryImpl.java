@@ -18,6 +18,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @Repository
 @Transactional(readOnly = true)
@@ -35,20 +36,14 @@ public class JdbcUserRepositoryImpl implements UserRepository {
             int caloriesPerDay = rs.getInt("calories_per_day");
             Role role = Role.valueOf(rs.getString("role"));
 
-            map.compute(id, (key, val) -> {
-                Set<Role> roles = (val == null) ? EnumSet.noneOf(Role.class) : val.getRoles();
-                if (roles.add(role)) {
-                    return new User(id, name, email, password, caloriesPerDay, enabled, registered, roles);
-                } else {
-                    return val;
-                }
-            });
-
-
+            map.computeIfAbsent(id, (key) -> new User(key, name, email, password, caloriesPerDay, enabled, registered, EnumSet.of(role)));
+            map.get(id).getRoles().add(role);
         }
-        List<User> list = new ArrayList<>(map.values());
-        list.sort(Comparator.comparing(User::getName).thenComparing(User::getEmail));
-        return list;
+
+        return map.values()
+                .stream()
+                .sorted(Comparator.comparing(User::getName).thenComparing(User::getEmail))
+                .collect(Collectors.toList());
     };
 
     private final JdbcTemplate jdbcTemplate;
@@ -73,37 +68,45 @@ public class JdbcUserRepositoryImpl implements UserRepository {
         BeanPropertySqlParameterSource parameterSource = new BeanPropertySqlParameterSource(user);
 
         String insertRole = "INSERT INTO user_roles (role, user_id) VALUES (?, ?)";
+        String updateRole = "UPDATE user_roles SET role=? WHERE user_id=?";
+        String action;
 
         List<Role> roles = new ArrayList<>(user.getRoles());
-        List<String> updatedUsersRoles;
 
         if (user.isNew()) {
             Number newKey = insertUser.executeAndReturnKey(parameterSource);
             user.setId(newKey.intValue());
-        } else if (namedParameterJdbcTemplate.update(
-                "UPDATE users SET name=:name, email=:email, password=:password, " +
-                        "registered=:registered, enabled=:enabled, calories_per_day=:caloriesPerDay WHERE id=:id", parameterSource) == 0) {
-            return null;
+            action = insertRole;
+        } else {
+            if (namedParameterJdbcTemplate.update(
+                    "UPDATE users SET name=:name, email=:email, password=:password, " +
+                            "registered=:registered, enabled=:enabled, calories_per_day=:caloriesPerDay WHERE id=:id", parameterSource) == 0) {
+                return null;
+            }
+            else {
+                List<String> updatedUsersRoles = jdbcTemplate.queryForList("SELECT role FROM user_roles WHERE user_id=?", String.class, user.getId());
+                if (!roles.isEmpty() && updatedUsersRoles != null && !updatedUsersRoles.isEmpty()) {
+                    for (String s : updatedUsersRoles) {
+                        Predicate<? super Role> rolePredicate = r -> r == Role.valueOf(s);
+                        roles.removeIf(rolePredicate);
+                    }
+                }
+                action = updateRole;
+            }
         }
 
-        updatedUsersRoles = jdbcTemplate.queryForList("SELECT role FROM user_roles WHERE user_id=?", String.class, user.getId());
-        if (!roles.isEmpty() && updatedUsersRoles != null && !updatedUsersRoles.isEmpty()) {
-            updatedUsersRoles.stream().<Predicate<? super Role>>map(s -> r -> r == Role.valueOf(s)).forEach(roles::removeIf);
-        }
-        if (!roles.isEmpty()) {
-            jdbcTemplate.batchUpdate(insertRole, new BatchPreparedStatementSetter() {
-                @Override
-                public void setValues(PreparedStatement ps, int i) throws SQLException {
-                    ps.setString(1, roles.get(i).toString());
-                    ps.setInt(2, user.getId());
-                }
+        jdbcTemplate.batchUpdate(action, new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                ps.setString(1, roles.get(i).toString());
+                ps.setInt(2, user.getId());
+            }
 
-                @Override
-                public int getBatchSize() {
-                    return roles.size();
-                }
-            });
-        }
+            @Override
+            public int getBatchSize() {
+                return roles.size();
+            }
+        });
 
         return user;
     }
