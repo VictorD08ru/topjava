@@ -27,12 +27,6 @@ public class JspMealController extends AbstractMealController {
         super(service);
     }
 
-    @GetMapping
-    public String meals(HttpServletRequest request) {
-        request.setAttribute("meals", getAll());
-        return "meals";
-    }
-
     @PostMapping
     public String filter(HttpServletRequest request) {
         LocalDate startDate = parseLocalDate(request.getParameter("startDate"));

@@ -17,7 +17,6 @@ import ru.javawebinar.topjava.repository.UserRepository;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Repository
@@ -67,35 +66,21 @@ public class JdbcUserRepositoryImpl implements UserRepository {
     public User save(User user) {
         BeanPropertySqlParameterSource parameterSource = new BeanPropertySqlParameterSource(user);
 
-        String insertRole = "INSERT INTO user_roles (role, user_id) VALUES (?, ?)";
-        String updateRole = "UPDATE user_roles SET role=? WHERE user_id=?";
-        String action;
-
         List<Role> roles = new ArrayList<>(user.getRoles());
 
         if (user.isNew()) {
             Number newKey = insertUser.executeAndReturnKey(parameterSource);
             user.setId(newKey.intValue());
-            action = insertRole;
         } else {
             if (namedParameterJdbcTemplate.update(
                     "UPDATE users SET name=:name, email=:email, password=:password, " +
                             "registered=:registered, enabled=:enabled, calories_per_day=:caloriesPerDay WHERE id=:id", parameterSource) == 0) {
                 return null;
             }
-            else {
-                List<String> updatedUsersRoles = jdbcTemplate.queryForList("SELECT role FROM user_roles WHERE user_id=?", String.class, user.getId());
-                if (!roles.isEmpty() && updatedUsersRoles != null && !updatedUsersRoles.isEmpty()) {
-                    for (String s : updatedUsersRoles) {
-                        Predicate<? super Role> rolePredicate = r -> r == Role.valueOf(s);
-                        roles.removeIf(rolePredicate);
-                    }
-                }
-                action = updateRole;
-            }
+            jdbcTemplate.update("DELETE FROM user_roles WHERE user_id=?", user.getId());
         }
 
-        jdbcTemplate.batchUpdate(action, new BatchPreparedStatementSetter() {
+        jdbcTemplate.batchUpdate("INSERT INTO user_roles (role, user_id) VALUES (?, ?)", new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
                 ps.setString(1, roles.get(i).toString());
