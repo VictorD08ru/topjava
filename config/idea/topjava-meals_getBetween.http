@@ -1,0 +1,4 @@
+GET http://localhost:8080/topjava/rest/meals/filter?startDate=2015-05-30&startTime=19:00
+
+###
+

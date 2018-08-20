@@ -1,0 +1,185 @@
+{
+	"info": {
+		"_postman_id": "b616b312-aad3-40ea-9db7-89495ce37e3a",
+		"name": "Topjava-meals",
+		"description": "test meals rest controller",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"_postman_id": "264812a7-48b6-494a-9870-bfd6894b782f",
+			"name": "get all meals",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "http://localhost:8080/topjava/rest/meals",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"topjava",
+						"rest",
+						"meals"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "3622a3a6-4491-42cf-acca-6731231b3ca8",
+			"name": "get meal 100002",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "http://localhost:8080/topjava/rest/meals/100002",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"topjava",
+						"rest",
+						"meals",
+						"100002"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "b6f4bc38-5329-43d7-b70f-822c9cbb376b",
+			"name": "get filtered meals",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "http://localhost:8080/topjava/rest/meals/filter?endDate=2015-05-30",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"topjava",
+						"rest",
+						"meals",
+						"filter"
+					],
+					"query": [
+						{
+							"key": "endDate",
+							"value": "2015-05-30"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "0e408f69-e493-41b2-a27d-7d4e1a3da15e",
+			"name": "update meal 100002",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"id\":100002,\n\t\"dateTime\":\"2015-05-30T10:00:00\",\n\t\"description\":\"Обновленный завтрак\",\n\t\"calories\":200\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8080/topjava/rest/meals/100002",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"topjava",
+						"rest",
+						"meals",
+						"100002"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "6fe2efe7-8a04-4b09-8f3d-b58fcb95c750",
+			"name": "create meal",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"dateTime\":\"2015-06-01T18:00:00\",\n\t\"description\":\"Созданный ужин\",\n\t\"calories\":300\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8080/topjava/rest/meals",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"topjava",
+						"rest",
+						"meals"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "9a779ad5-6929-4c7b-bb79-f17c7c0d2b42",
+			"name": "delete meal 100007",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": ""
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "416862b0-fae4-48a8-83dd-10fd6062e312",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "d0f421c2-18b4-4b88-ae51-30f305cf86a7",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}

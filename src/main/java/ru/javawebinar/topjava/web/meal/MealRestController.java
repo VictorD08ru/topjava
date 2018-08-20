@@ -14,12 +14,12 @@ import java.time.LocalTime;
 import java.util.List;
 
 @RestController
-@RequestMapping(MealRestController.REST_URL)
+@RequestMapping(value = MealRestController.REST_URL, produces = MediaType.APPLICATION_JSON_VALUE)
 public class MealRestController extends AbstractMealController {
     static final String REST_URL = "/rest/meals";
 
     @Override
-    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/{id}")
     public Meal get(@PathVariable int id) {
         return super.get(id);
     }
@@ -32,12 +32,12 @@ public class MealRestController extends AbstractMealController {
     }
 
     @Override
-    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping
     public List<MealWithExceed> getAll() {
         return super.getAll();
     }
 
-    @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Meal> createWithLocation(@RequestBody Meal meal) {
         Meal created = super.create(meal);
         URI uriOfNewResource = ServletUriComponentsBuilder.fromCurrentContextPath()
@@ -53,11 +53,20 @@ public class MealRestController extends AbstractMealController {
         super.update(meal, id);
     }
 
-    @GetMapping(value = "/filter", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/filter")
     public List<MealWithExceed> getBetween(@RequestParam(required = false) LocalDate startDate,
                                            @RequestParam(required = false) LocalTime startTime,
                                            @RequestParam(required = false) LocalDate endDate,
                                            @RequestParam(required = false) LocalTime endTime) {
         return super.getBetween(startDate, startTime,  endDate, endTime);
     }
+
+/*
+    @GetMapping(value = "/filter")
+    public List<MealWithExceed> getBetween(@RequestParam(required = false) @DateTimeFormat LocalDateTime startDateTime,
+                                           @RequestParam(required = false) @DateTimeFormat LocalDateTime endDateTime) {
+        return super.getBetween(startDateTime.toLocalDate(),
+                startDateTime.toLocalTime(),
+                endDateTime.toLocalDate(), endDateTime.toLocalTime());
+    }*/
 }
