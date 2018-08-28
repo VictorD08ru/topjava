@@ -39,4 +39,16 @@ $(function () {
         ]
     });
     makeEditable();
+    $('.enable').click(function(){
+        var id = $(this).closest("tr").attr("id");
+        var str = $(this).is(':checked') ? "enabled" : "disabled";
+            $.ajax({
+            url: ajaxUrl + id,
+            method: 'POST',
+            success: function(){
+                updateTable();
+                successNoty("User " + str);
+            }
+        });
+    });
 });
