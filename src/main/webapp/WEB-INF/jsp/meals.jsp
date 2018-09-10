@@ -14,30 +14,24 @@
         <h3 class="text-center"><spring:message code="meal.title"/></h3>
         <%--https://getbootstrap.com/docs/4.0/components/card/--%>
         <div class="card">
-            <div class="card-body py-0 border">
-                <form id="filter" class="my-0">
+            <div class="card-body pb-0">
+                <form id="filter">
                     <div class="row">
-                        <div class="offset-2 col-6">
-                            <div class="form-group">
-                                <label class="col-form-label" for="startDate"><spring:message
-                                        code="meal.startDate"/></label>
-                                <input class="form-control col-6" type="date" name="startDate" id="startDate">
-
-                                <label class="col-form-label" for="endDate"><spring:message
-                                        code="meal.endDate"/></label>
-                                <input class="form-control col-6" type="date" name="endDate" id="endDate">
-                            </div>
+                        <div class="offset-1 col-2">
+                            <label for="startDate"><spring:message code="meal.startDate"/></label>
+                            <input class="form-control" name="startDate" id="startDate">
                         </div>
-                        <div class="col-4">
-                            <div class="form-group">
-                                <label class="col-form-label" for="startTime"><spring:message
-                                        code="meal.startTime"/></label>
-                                <input class="form-control col-6" type="time" name="startTime" id="startTime">
-
-                                <label class="col-form-label" for="endTime"><spring:message
-                                        code="meal.endTime"/></label>
-                                <input class="form-control col-6" type="time" name="endTime" id="endTime">
-                            </div>
+                        <div class="col-2">
+                            <label for="endDate"><spring:message code="meal.endDate"/></label>
+                            <input class="form-control" name="endDate" id="endDate">
+                        </div>
+                        <div class="offset-2 col-2">
+                            <label for="startTime"><spring:message code="meal.startTime"/></label>
+                            <input class="form-control" name="startTime" id="startTime">
+                        </div>
+                        <div class="col-2">
+                            <label for="endTime"><spring:message code="meal.endTime"/></label>
+                            <input class="form-control" name="endTime" id="endTime">
                         </div>
                     </div>
                 </form>
@@ -68,21 +62,6 @@
                 <th></th>
             </tr>
             </thead>
-            <c:forEach items="${meals}" var="meal">
-                <jsp:useBean id="meal" type="ru.javawebinar.topjava.to.MealWithExceed"/>
-                <tr data-mealExceed="${meal.exceed}">
-                    <td>
-                            <%--${meal.dateTime.toLocalDate()} ${meal.dateTime.toLocalTime()}--%>
-                            <%--<%=TimeUtil.toString(meal.getDateTime())%>--%>
-                            <%--${fn:replace(meal.dateTime, 'T', ' ')}--%>
-                            ${fn:formatDateTime(meal.dateTime)}
-                    </td>
-                    <td>${meal.description}</td>
-                    <td>${meal.calories}</td>
-                    <td><a><span class="fa fa-pencil"></span></a></td>
-                    <td><a onclick="deleteRow(${meal.id})"><span class="fa fa-remove"></span></a></td>
-                </tr>
-            </c:forEach>
         </table>
     </div>
 </div>
@@ -91,7 +70,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title" id="modalTitle"><spring:message code="meal.add"/></h4>
+                <h4 class="modal-title" id="modalTitle"></h4>
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
             </div>
             <div class="modal-body">
@@ -100,7 +79,7 @@
 
                     <div class="form-group">
                         <label for="dateTime" class="col-form-label"><spring:message code="meal.dateTime"/></label>
-                        <input type="datetime-local" class="form-control" id="dateTime" name="dateTime"
+                        <input class="form-control" id="dateTime" name="dateTime"
                                placeholder="<spring:message code="meal.dateTime"/>">
                     </div>
 
@@ -132,4 +111,7 @@
 </div>
 <jsp:include page="fragments/footer.jsp"/>
 </body>
+<jsp:include page="fragments/i18n.jsp">
+    <jsp:param name="page" value="meal"/>
+</jsp:include>
 </html>
